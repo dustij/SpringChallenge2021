@@ -2,6 +2,7 @@
 
 function getNextAction(state: GameState): Action {
   // TODO: Implement your algorithm to select the next action based on the game state
+  console.error({ state })
   return state.possibleActions[0]
 }
 
@@ -192,3 +193,5 @@ function mainloop() {
     console.log(actionToString(action))
   }
 }
+
+mainloop()
