@@ -2,7 +2,14 @@
 
 function getNextAction(state: GameState): Action {
   // TODO: Implement your algorithm to select the next action based on the game state
-  console.error({ state })
+  console.error(state.possibleActions)
+  const completes = state.possibleActions.filter((a) => a.type === COMPLETE)
+  if (completes.length > 0) {
+    if (completes.length > 1) {
+      return completes.sort((a, b) => a.target! - b.target!)[0]
+    }
+    return completes[0]
+  }
   return state.possibleActions[0]
 }
 
@@ -168,9 +175,15 @@ function mainloop() {
       opponentIsWaiting: inputs[2] !== "0",
     })
 
+    // Reset trees and possible actions
+    gameState = updateGameState(gameState, {
+      trees: [],
+      possibleActions: [],
+    })
+
     // @ts-ignore
     const numberOfTrees = parseInt(readline())
-
+    let newTrees: Tree[] = []
     for (let i = 0; i < numberOfTrees; i++) {
       // @ts-ignore
       let inputs = readline().split(" ")
@@ -178,16 +191,18 @@ function mainloop() {
       const size = parseInt(inputs[1])
       const isMine = inputs[2] !== "0"
       const isDormant = inputs[3] !== "0" // ignore in this leage
-      gameState.trees.push(createTree(cellIndex, size, isMine, isDormant))
+      newTrees.push(createTree(cellIndex, size, isMine, isDormant))
     }
+    gameState = updateGameState(gameState, { trees: newTrees })
 
     // @ts-ignore
     const numberOfPossibleActions = parseInt(readline())
-
+    let newActions: Action[] = []
     for (let i = 0; i < numberOfPossibleActions; i++) {
       // @ts-ignore
-      gameState.possibleActions.push(parseAction(readline()))
+      newActions.push(parseAction(readline()))
     }
+    gameState = updateGameState(gameState, { possibleActions: newActions })
 
     const action = getNextAction(gameState)
     console.log(actionToString(action))
