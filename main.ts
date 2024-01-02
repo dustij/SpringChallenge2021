@@ -43,9 +43,15 @@ function getNextAction(state: GameState): Action {
     }
     // Skip if it will be shadowed next turn
     // TODO: implement this
+    const shadowIndexNextTurn = (state.day + 1) % 6
+    console.error(shadowIndexNextTurn)
 
     return grows[0]
   }
+
+  // TODO: remove this later
+  const shadowIndexNextTurn = (state.day + 1) % 6
+  console.error("shadow next turn:", shadowIndexNextTurn)
 
   // Try to seed a tree from center to outside while being mindfull of sun position
   const seeds = state.possibleActions.filter((a) => a.type === SEED)
