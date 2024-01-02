@@ -1,5 +1,5 @@
 // Implement your algorithm here ===================================================
-const LARGE_TREE_THRESHOLD = 3
+const LARGE_TREE_THRESHOLD = 2
 
 function getNextAction(state: GameState): Action {
   // TODO: Implement your algorithm to select the next action based on the game state
@@ -41,6 +41,9 @@ function getNextAction(state: GameState): Action {
           state.trees.find((t) => t.cellIndex === a.target)!.size
       )
     }
+    // Skip if it will be shadowed next turn
+    // TODO: implement this
+
     return grows[0]
   }
 
