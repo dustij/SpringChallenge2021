@@ -160,7 +160,7 @@ function mainloop() {
       myScore: parseInt(inputs[1]),
     })
     // @ts-ignore
-    let inputs = readline().split(" ")
+    inputs = readline().split(" ")
     gameState = updateGameState(gameState, {
       opponentSun: parseInt(inputs[0]),
       opponentScore: parseInt(inputs[1]),
@@ -177,19 +177,6 @@ function mainloop() {
       const size = parseInt(inputs[1])
       const isMine = inputs[2] !== "0"
       const isDormant = inputs[3] !== "0" // ignore in this leage
-      gameState.trees.push(createTree(cellIndex, size, isMine, isDormant))
-    }
-
-    // @ts-ignore
-    const numberOfTrees = parseInt(readline())
-
-    for (let i = 0; i < numberOfTrees; i++) {
-      // @ts-ignore
-      var inputs = readline().split(" ")
-      const cellIndex = parseInt(inputs[0])
-      const size = parseInt(inputs[1])
-      const isMine = inputs[2] !== "0"
-      const isDormant = inputs[3] !== "0"
       gameState.trees.push(createTree(cellIndex, size, isMine, isDormant))
     }
 
