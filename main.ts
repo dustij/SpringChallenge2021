@@ -3,6 +3,11 @@
 function getNextAction(state: GameState): Action {
   // TODO: Implement your algorithm to select the next action based on the game state
   console.error(state.possibleActions)
+
+  // Note: the lower the target cell index, the closer the cell is to the center
+  // thus making it more valuable, so we sort the possible actions by target cell index
+
+  // Try to complete a tree first
   const completes = state.possibleActions.filter((a) => a.type === COMPLETE)
   if (completes.length > 0) {
     if (completes.length > 1) {
@@ -10,10 +15,71 @@ function getNextAction(state: GameState): Action {
     }
     return completes[0]
   }
+
+  // Try to grow a tree if we have enough sun
+  const grows = state.possibleActions.filter((a) => a.type === GROW)
+  if (grows.length > 0) {
+    if (grows.length > 1) {
+      grows.sort((a, b) => a.target! - b.target!)[0]
+    }
+
+    for (const grow of grows) {
+      const growCost = getGrowCost(state, grow.target!)
+      if (state.mySun >= growCost) {
+        return grow
+      }
+    }
+  }
+
+  // Try to seed a tree if we have enough sun
+  const seeds = state.possibleActions.filter((a) => a.type === SEED)
+  if (seeds.length > 0) {
+    if (seeds.length > 1) {
+      seeds.sort((a, b) => a.source! - b.source!)[0]
+    }
+
+    for (const seed of seeds) {
+      const seedCost = getSeedCost(state)
+      if (state.mySun >= seedCost) {
+        // Find the cell with the highest richness
+        const seedsBySource = seeds.filter((s) => s.source === seed.source)
+        const richestSeed = seedsBySource.sort(
+          (a, b) =>
+            state.cells[b.target!].richness - state.cells[a.target!].richness
+        )[0]
+
+        // Richest seed must not be unusable
+        if (state.cells[richestSeed.target!].richness !== 0) {
+          return richestSeed
+        }
+      }
+    }
+  }
+
+  // Wait if we can't do anything else
   return state.possibleActions[0]
 }
 
 // ================================================================================
+
+function getGrowCost(state: GameState, target: number): number {
+  const treeSize = state.trees.find((t) => t.cellIndex === target)!.size
+  const numberOfTreesOfSize = state.trees.filter(
+    (t) => t.size === treeSize + 1
+  ).length
+
+  const baseCost = [1, 3, 7][treeSize]
+  const totalCost = baseCost + numberOfTreesOfSize
+
+  return totalCost
+}
+
+function getSeedCost(state: GameState): number {
+  const numberOfSeeds = state.trees.filter((t) => t.size === 0).length
+  const totalCost = 1 + numberOfSeeds
+
+  return totalCost
+}
 
 interface Cell {
   index: number
