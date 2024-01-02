@@ -1,4 +1,6 @@
 // Implement your algorithm here ===================================================
+const LARGE_TREE_THRESHOLD = 3
+
 function getNextAction(state: GameState): Action {
   // TODO: Implement your algorithm to select the next action based on the game state
   console.error(state.possibleActions)
@@ -19,9 +21,9 @@ function getNextAction(state: GameState): Action {
     return seedsToCenter[0]
   }
 
-  // Try to complete a nutrient rich tree first
+  // Try to complete a nutrient rich tree first, but only if we have more than a certain amount
   const completes = state.possibleActions.filter((a) => a.type === COMPLETE)
-  if (completes.length > 0) {
+  if (completes.length > LARGE_TREE_THRESHOLD) {
     if (completes.length > 1) {
       completes.sort((a, b) => a.target! - b.target!)
     }
@@ -42,7 +44,7 @@ function getNextAction(state: GameState): Action {
     return grows[0]
   }
 
-  // Try to seed a tree from center to outside
+  // Try to seed a tree from center to outside while being mindfull of sun position
   const seeds = state.possibleActions.filter((a) => a.type === SEED)
   if (seeds.length > 0) {
     if (seeds.length > 1) {
@@ -52,12 +54,13 @@ function getNextAction(state: GameState): Action {
     for (const seed of seeds) {
       // Find the cell with the highest richness
       const seedsBySource = seeds.filter((s) => s.source === seed.source)
-      const richestSeed = seedsBySource.sort(
+      const seedsByRichness = seedsBySource.sort(
         (a, b) =>
           state.cells[b.target!].richness - state.cells[a.target!].richness
-      )[0]
+      )
 
       // Richest seed must not be unusable
+      let richestSeed = seedsByRichness[0]
       if (state.cells[richestSeed.target!].richness !== 0) {
         return richestSeed
       }
