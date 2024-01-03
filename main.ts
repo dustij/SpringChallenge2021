@@ -1,5 +1,6 @@
 // Implement your algorithm here ===================================================
 const LARGE_TREE_THRESHOLD = 2
+const STOP_SEEDING_DAY = 21
 
 function getNextAction(state: GameState): Action {
   // console.error(state.possibleActions)
@@ -12,7 +13,7 @@ function getNextAction(state: GameState): Action {
     (a) => a.type === SEED && state.cells[a.target!].richness === 3
   )
 
-  if (seedsToCenter.length > 0) {
+  if (seedsToCenter.length > 0 && state.day < STOP_SEEDING_DAY) {
     if (seedsToCenter.length > 1) {
       seedsToCenter.sort((a, b) => a.target! - b.target!)
     }
@@ -41,42 +42,6 @@ function getNextAction(state: GameState): Action {
       )
     }
     return grows[0]
-    // // shadow next turn
-    // const shadowIndexNextTurn = (state.day + 1) % 6
-    // const oppositeShadowIndexNextTurn =
-    //   oppositeDirectionIndex(shadowIndexNextTurn)
-
-    // // Avoid growing trees that will be effected by shadow next turn
-    // for (const grow of grows) {
-    //   // Find the cell that will be casting shadow
-    //   const oppositeShadowCellIndex =
-    //     state.cells[grow.target!].neighbors[oppositeShadowIndexNextTurn]
-
-    //   if (oppositeShadowCellIndex !== -1) {
-    //     // If there is a tree here...
-    //     const treeCastingShadow = state.trees.find(
-    //       (t) => t.cellIndex === oppositeShadowCellIndex
-    //     )
-    //     const targetGrowTree = state.trees.find(
-    //       (t) => t.cellIndex === grow.target
-    //     )
-    //     if (treeCastingShadow) {
-    //       // ... and it's bigger than the tree we're trying to grow...
-    //       if (treeCastingShadow.size >= targetGrowTree!.size + 1) {
-    //         // ... then skip this grow
-    //         console.error("Skipping grow for:", grow.target)
-    //         console.error("Tree casting shadow:", treeCastingShadow.cellIndex)
-    //         continue
-    //       } else {
-    //         // ... otherwise grow this tree
-    //         return grow
-    //       }
-    //     }
-    //   } else {
-    //     // No tree casting shadow, grow this tree
-    //     return grow
-    //   }
-    // }
   }
 
   // Try to seed a tree from center to outside while being mindfull of sun position
@@ -96,7 +61,10 @@ function getNextAction(state: GameState): Action {
 
       // Richest seed must not be unusable
       let richestSeed = seedsByRichness[0]
-      if (state.cells[richestSeed.target!].richness !== 0) {
+      if (
+        state.cells[richestSeed.target!].richness !== 0 &&
+        state.day < STOP_SEEDING_DAY
+      ) {
         return richestSeed
       }
     }
