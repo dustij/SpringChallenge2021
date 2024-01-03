@@ -2,8 +2,7 @@
 const LARGE_TREE_THRESHOLD = 2
 
 function getNextAction(state: GameState): Action {
-  // TODO: Implement your algorithm to select the next action based on the game state
-  console.error(state.possibleActions)
+  // console.error(state.possibleActions)
 
   // Note: the lower the target cell index, the closer the cell is to the center
   // thus making it more valuable, so we sort the possible actions by target cell index
@@ -21,7 +20,7 @@ function getNextAction(state: GameState): Action {
     return seedsToCenter[0]
   }
 
-  // Try to complete a nutrient rich tree first, but only if we have more than a certain amount
+  // Try to complete a tree first, but only if we have more than a certain amount
   const completes = state.possibleActions.filter((a) => a.type === COMPLETE)
   if (completes.length > LARGE_TREE_THRESHOLD) {
     if (completes.length > 1) {
@@ -30,7 +29,7 @@ function getNextAction(state: GameState): Action {
     return completes[0]
   }
 
-  // Try to grow a tree from largest to smallest then from center to outside
+  // Try to grow best tree, sorted largest to smallest then center to outside
   const grows = state.possibleActions.filter((a) => a.type === GROW)
   if (grows.length > 0) {
     if (grows.length > 1) {
@@ -41,17 +40,44 @@ function getNextAction(state: GameState): Action {
           state.trees.find((t) => t.cellIndex === a.target)!.size
       )
     }
-    // Skip if it will be shadowed next turn
-    // TODO: implement this
-    const shadowIndexNextTurn = (state.day + 1) % 6
-    console.error(shadowIndexNextTurn)
-
     return grows[0]
-  }
+    // // shadow next turn
+    // const shadowIndexNextTurn = (state.day + 1) % 6
+    // const oppositeShadowIndexNextTurn =
+    //   oppositeDirectionIndex(shadowIndexNextTurn)
 
-  // TODO: remove this later
-  const shadowIndexNextTurn = (state.day + 1) % 6
-  console.error("shadow next turn:", shadowIndexNextTurn)
+    // // Avoid growing trees that will be effected by shadow next turn
+    // for (const grow of grows) {
+    //   // Find the cell that will be casting shadow
+    //   const oppositeShadowCellIndex =
+    //     state.cells[grow.target!].neighbors[oppositeShadowIndexNextTurn]
+
+    //   if (oppositeShadowCellIndex !== -1) {
+    //     // If there is a tree here...
+    //     const treeCastingShadow = state.trees.find(
+    //       (t) => t.cellIndex === oppositeShadowCellIndex
+    //     )
+    //     const targetGrowTree = state.trees.find(
+    //       (t) => t.cellIndex === grow.target
+    //     )
+    //     if (treeCastingShadow) {
+    //       // ... and it's bigger than the tree we're trying to grow...
+    //       if (treeCastingShadow.size >= targetGrowTree!.size + 1) {
+    //         // ... then skip this grow
+    //         console.error("Skipping grow for:", grow.target)
+    //         console.error("Tree casting shadow:", treeCastingShadow.cellIndex)
+    //         continue
+    //       } else {
+    //         // ... otherwise grow this tree
+    //         return grow
+    //       }
+    //     }
+    //   } else {
+    //     // No tree casting shadow, grow this tree
+    //     return grow
+    //   }
+    // }
+  }
 
   // Try to seed a tree from center to outside while being mindfull of sun position
   const seeds = state.possibleActions.filter((a) => a.type === SEED)
@@ -78,6 +104,10 @@ function getNextAction(state: GameState): Action {
 
   // Wait if we can't do anything else
   return state.possibleActions[0]
+}
+
+function oppositeDirectionIndex(direction: number) {
+  return (direction + 3) % 6
 }
 
 // ================================================================================
