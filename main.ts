@@ -1,8 +1,7 @@
 // Implement your algorithm here ===================================================
 const LARGE_TREE_THRESHOLD = 2
-const STOP_SEEDING_DAY = 21
 const EARLY_GAME_THRESHOLD = 3
-const MID_GAME_THRESHOLD = 12
+const MID_GAME_THRESHOLD = 17
 const LATE_GAME_THRESHOLD = 21
 const CORENER_INDEXES = [19, 22, 25, 28, 31, 34]
 const OUTSIDE_INDEXES = [
@@ -79,14 +78,17 @@ function getNextAction(state: GameState): Action {
     (a) => a.type === SEED && state.cells![a.target!].richness === 3
   )
 
-  if (seedsToCenter.length > 0 && state.day < STOP_SEEDING_DAY) {
+  if (seedsToCenter.length > 0 && state.day < LATE_GAME_THRESHOLD) {
     seedsToCenter.sort((a, b) => a.target! - b.target!)
     return seedsToCenter[0]
   }
 
   // Try to complete a tree first, but only if we have more than a certain amount
   const completes = state.possibleActions.filter((a) => a.type === COMPLETE)
-  if (completes.length > LARGE_TREE_THRESHOLD) {
+  if (
+    completes.length > LARGE_TREE_THRESHOLD ||
+    state.day > LATE_GAME_THRESHOLD
+  ) {
     completes.sort((a, b) => a.target! - b.target!)
 
     for (const complete of completes) {
@@ -195,7 +197,7 @@ function getNextAction(state: GameState): Action {
       let richestSeed = seedsByRichness[0]
       if (
         state.cells![richestSeed.target!].richness !== 0 &&
-        state.day < STOP_SEEDING_DAY
+        state.day < LATE_GAME_THRESHOLD
       ) {
         return richestSeed
       }
